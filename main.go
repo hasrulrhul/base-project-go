@@ -1,6 +1,7 @@
 package main
 
 import (
+	"base-project-go/database"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	database.ConnectDatabase()
 
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
 	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
 }

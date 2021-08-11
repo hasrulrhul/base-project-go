@@ -13,6 +13,9 @@ run makefile dengan perintah make dev
 # install echo
 go get -u github.com/labstack/echo/v4
 
+# install gin
+go get -u github.com/gin-gonic/gin
+
 # publish vendor
 go mod vendor
 

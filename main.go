@@ -5,10 +5,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo"
+	"gorm.io/gorm"
 )
+
+type Users struct {
+	ID        uint           `json:"id"`
+	Name      string         `json:"name"`
+	Username  string         `json:"username"`
+	Email     string         `json:"email"`
+	CreatedAt time.Time      `json:"created_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+}
 
 func main() {
 	err := godotenv.Load()
@@ -17,10 +28,23 @@ func main() {
 	}
 	database.ConnectDatabase()
 
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "hello Gin",
+		})
+	})
+	r.GET("/users", func(c *gin.Context) {
+		var result Users
+		database.DB.Raw("SELECT * FROM users").Scan(&result)
+		c.JSON(http.StatusOK, result)
+	})
+	r.GET("/users/:id", func(c *gin.Context) {
+		var result Users
+		ID := c.Param("id")
+		database.DB.Raw("SELECT * FROM users WHERE id = ?", ID).Scan(&result)
+		c.JSON(http.StatusOK, gin.H{"message": http.StatusOK, "result": result})
 	})
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
+	r.Run(":" + os.Getenv("APP_PORT"))
 }

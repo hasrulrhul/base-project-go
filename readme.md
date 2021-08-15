@@ -32,3 +32,21 @@ go get -u gorm.io/driver/mysql
 
 # mysql
 go get package github.com/go-sql-driver/mysql
+
+go run main.go -mysql.dsn "root:@tcp(localhost)/golang"
+
+migrate -database mysql -path /Users/hasrul/Documents/project-Go/base-project-go/db/migrations up
+
+
+install library
+$ brew install golang-migrate
+
+
+untuk lihat versinya 
+$ migrate -version
+
+untuk melihta perintah command migrate
+$ migrate -help
+
+buat filemigration tabel users
+migrate create -ext sql -dir db/migrations -seq create_users_table

@@ -2,24 +2,14 @@ package main
 
 import (
 	"base-project-go/database"
+	"base-project-go/models"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
-
-type Users struct {
-	ID        uint           `json:"id"`
-	Name      string         `json:"name"`
-	Username  string         `json:"username"`
-	Email     string         `json:"email"`
-	CreatedAt time.Time      `json:"created_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
-}
 
 func main() {
 	err := godotenv.Load()
@@ -27,6 +17,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	database.ConnectDatabase()
+	database.DB.AutoMigrate(&models.Menu{})
+	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.Option{})
+	database.DB.AutoMigrate(&models.Role{})
+	database.DB.AutoMigrate(&models.UserMenu{})
 
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
@@ -35,12 +30,12 @@ func main() {
 		})
 	})
 	r.GET("/users", func(c *gin.Context) {
-		var result Users
+		var result models.User
 		database.DB.Raw("SELECT * FROM users").Scan(&result)
 		c.JSON(http.StatusOK, result)
 	})
 	r.GET("/users/:id", func(c *gin.Context) {
-		var result Users
+		var result models.User
 		ID := c.Param("id")
 		database.DB.Raw("SELECT * FROM users WHERE id = ?", ID).Scan(&result)
 		c.JSON(http.StatusOK, gin.H{"message": http.StatusOK, "result": result})

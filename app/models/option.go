@@ -17,3 +17,7 @@ type Option struct {
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
+
+func (b *Option) TableName() string {
+	return "option"
+}

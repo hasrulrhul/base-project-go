@@ -14,3 +14,7 @@ type Role struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
+
+func (b *Role) TableName() string {
+	return "role"
+}

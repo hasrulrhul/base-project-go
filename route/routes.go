@@ -13,13 +13,14 @@ func SetupRouter() *gin.Engine {
 		Route.GET("/", controllers.Index)
 		Route.POST("/foo", controllers.IndexPost)
 
-		users := Route.Group("/users")
+		user := Route.Group("/user")
 		{
-			users.GET("/", controllers.IndexUser)
-			users.POST("/", controllers.CreateUser)
-			// Router.GET("/:id", controllers.ShowUser)
-			// Router.PUT("/:id", controllers.UpdateUser)
-			// Router.DELETE("/:id", controllers.DeleteUser)
+			user.GET("/", controllers.IndexUser)
+			user.POST("/", controllers.CreateUser)
+			// user.POST("/", controllers.CreateOrUpdateUser)
+			user.GET("/:id", controllers.ShowUser)
+			user.PUT("/:id", controllers.UpdateUser)
+			user.DELETE("/:id", controllers.DeleteUser)
 		}
 
 		role := Route.Group("/role")

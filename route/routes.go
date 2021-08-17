@@ -13,37 +13,51 @@ func SetupRouter() *gin.Engine {
 		Route.GET("/", controllers.Index)
 		Route.POST("/foo", controllers.IndexPost)
 
+		option := Route.Group("/option")
+		{
+			option.GET("", controllers.IndexOption)
+			option.POST("", controllers.CreateOption)
+			option.GET("/:id", controllers.ShowOption)
+			option.PUT("/:id", controllers.UpdateOption)
+			option.DELETE("/:id", controllers.DeleteOption)
+		}
+
+		role := Route.Group("/role")
+		{
+			role.GET("", controllers.IndexRole)
+			role.POST("", controllers.CreateRole)
+			role.GET("/:id", controllers.ShowRole)
+			role.PUT("/:id", controllers.UpdateRole)
+			role.DELETE("/:id", controllers.DeleteRole)
+		}
+
 		user := Route.Group("/user")
 		{
-			user.GET("/", controllers.IndexUser)
-			user.POST("/", controllers.CreateUser)
-			// user.POST("/", controllers.CreateOrUpdateUser)
+			user.GET("", controllers.IndexUser)
+			user.POST("", controllers.CreateUser)
 			user.GET("/:id", controllers.ShowUser)
 			user.PUT("/:id", controllers.UpdateUser)
 			user.DELETE("/:id", controllers.DeleteUser)
 		}
 
-		role := Route.Group("/role")
+		menu := Route.Group("/menu")
 		{
-			role.GET("/", controllers.IndexRole)
-			role.POST("/", controllers.CreateRole)
-			role.GET("/:id", controllers.ShowRole)
-			role.PUT("/:id", controllers.UpdateRole)
-			role.DELETE("/:id", controllers.DeleteRole)
+			menu.GET("", controllers.IndexMenu)
+			menu.POST("", controllers.CreateMenu)
+			menu.GET("/:id", controllers.ShowMenu)
+			menu.PUT("/:id", controllers.UpdateMenu)
+			menu.DELETE("/:id", controllers.DeleteMenu)
+		}
+
+		usermenu := Route.Group("/user-menu")
+		{
+			usermenu.GET("", controllers.IndexUserMenu)
+			usermenu.POST("", controllers.CreateUserMenu)
+			usermenu.GET("/:id", controllers.ShowUserMenu)
+			usermenu.PUT("/:id", controllers.UpdateUserMenu)
+			usermenu.DELETE("/:id", controllers.DeleteUserMenu)
 		}
 	}
-
-	// r.GET("/users", func(c *gin.Context) {
-	// 	var result models.User
-	// 	database.DB.Raw("SELECT * FROM users").Scan(&result)
-	// 	c.JSON(http.StatusOK, result)
-	// })
-	// r.GET("/users/:id", func(c *gin.Context) {
-	// 	var result models.User
-	// 	ID := c.Param("id")
-	// 	database.DB.Raw("SELECT * FROM users WHERE id = ?", ID).Scan(&result)
-	// 	c.JSON(http.StatusOK, gin.H{"message": http.StatusOK, "result": result})
-	// })
 
 	return r
 }

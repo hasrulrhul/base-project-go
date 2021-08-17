@@ -19,27 +19,22 @@ func CreateUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		panic(err)
 	}
-	config.DB.Create(&user)
-	c.JSON(http.StatusOK, user)
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }
-
-// func CreateOrUpdateUser(c *gin.Context) {
-// 	var user []models.User
-// 	if err := c.BindJSON(&user); err != nil {
-// 		panic(err)
-// 	}
-// 	config.DB.Clauses(clause.OnConflict{
-// 		Columns:   []clause.Column{{Name: "id"}},
-// 		DoUpdates: clause.AssignmentColumns([]string{"name", "username", "email", "password", "role_id"}),
-// 	}).Create(&user)
-// 	c.JSON(http.StatusOK, user)
-// }
 
 func ShowUser(c *gin.Context) {
 	id := c.Params.ByName("id")
 	var user models.User
-	config.DB.Preload("Role").First(&user, id)
-	c.JSON(http.StatusOK, user)
+	err := config.DB.Preload("Role").First(&user, id).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "not found")
+	} else {
+		c.JSON(http.StatusOK, user)
+	}
 }
 
 func UpdateUser(c *gin.Context) {
@@ -47,13 +42,17 @@ func UpdateUser(c *gin.Context) {
 	var user models.User
 	err := config.DB.Preload("Role").First(&user, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "Record not found")
+		c.JSON(http.StatusBadRequest, "not found")
+		return
 	}
 	if err := c.BindJSON(&user); err != nil {
 		panic(err)
 	}
-	config.DB.Updates(&user)
-	c.JSON(http.StatusOK, user)
+	if err := config.DB.Updates(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }
 
 func DeleteUser(c *gin.Context) {
@@ -61,7 +60,12 @@ func DeleteUser(c *gin.Context) {
 	var user models.User
 	err := config.DB.First(&user, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "Record not found")
+		c.JSON(http.StatusBadRequest, "not found")
+		return
 	}
-	config.DB.Delete(&user)
+	if err := config.DB.Delete(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }

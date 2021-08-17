@@ -8,11 +8,11 @@ import (
 
 type Menu struct {
 	ID        uint           `json:"id"`
-	Parent    string         `gorm:"not null" json:"parent"`
+	Parent    string         `json:"parent"`
 	Name      string         `gorm:"not null" json:"name"`
 	Icon      string         `json:"icon"`
 	Url       string         `json:"url"`
-	Index     uint16         `gorm:"not null" json:"index"`
+	Index     uint16         `json:"index"`
 	Active    string         `gorm:"type:enum('1', '0');default:'1'" json:"active"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`

@@ -16,16 +16,25 @@ func IndexRole(c *gin.Context) {
 
 func CreateRole(c *gin.Context) {
 	var role models.Role
-	c.BindJSON(&role)
-	config.DB.Create(&role)
-	c.JSON(http.StatusOK, role)
+	if err := c.BindJSON(&role); err != nil {
+		panic(err)
+	}
+	if err := config.DB.Create(&role).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }
 
 func ShowRole(c *gin.Context) {
 	id := c.Params.ByName("id")
 	var role models.Role
-	config.DB.First(&role, id)
-	c.JSON(http.StatusOK, role)
+	err := config.DB.First(&role, id).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "not found")
+	} else {
+		c.JSON(http.StatusOK, role)
+	}
 }
 
 func UpdateRole(c *gin.Context) {
@@ -33,11 +42,17 @@ func UpdateRole(c *gin.Context) {
 	var role models.Role
 	err := config.DB.First(&role, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "Record not found")
+		c.JSON(http.StatusBadRequest, "not found")
+		return
 	}
-	c.BindJSON(&role)
-	config.DB.Updates(&role)
-	c.JSON(http.StatusOK, role)
+	if err := c.BindJSON(&role); err != nil {
+		panic(err)
+	}
+	if err := config.DB.Updates(&role).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }
 
 func DeleteRole(c *gin.Context) {
@@ -45,7 +60,12 @@ func DeleteRole(c *gin.Context) {
 	var role models.Role
 	err := config.DB.First(&role, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "Record not found")
+		c.JSON(http.StatusBadRequest, "not found")
+		return
 	}
-	config.DB.Delete(&role)
+	if err := config.DB.Delete(&role).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
 }

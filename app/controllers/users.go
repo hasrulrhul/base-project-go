@@ -69,3 +69,18 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusOK, "success")
 	}
 }
+
+func UploadUser(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var user models.User
+	err := config.DB.First(&user, id).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "not found")
+		return
+	}
+	if err := config.DB.Delete(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
+	}
+}

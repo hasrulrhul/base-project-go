@@ -2,16 +2,33 @@ package route
 
 import (
 	"base-project-go/app/controllers"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://*", "http://*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		// AllowOriginFunc: func(origin string) bool {
+		// 	return origin == "https://github.com"
+		// },
+		MaxAge: 12 * time.Hour,
+	}))
+
+	r.MaxMultipartMemory = 8 << 20
+
 	Route := r.Group("/api")
 	{
-		Route.GET("/", controllers.Index)
+		Route.GET("", controllers.Index)
 		Route.POST("/foo", controllers.IndexPost)
+		Route.GET("/halo", controllers.Hello)
 
 		option := Route.Group("/option")
 		{
@@ -57,6 +74,10 @@ func SetupRouter() *gin.Engine {
 			usermenu.PUT("/:id", controllers.UpdateUserMenu)
 			usermenu.DELETE("/:id", controllers.DeleteUserMenu)
 		}
+
+		Route.POST("/upload", controllers.UploadFile)
+		Route.POST("/uploads", controllers.UploadFile2)
+		Route.POST("/delete-file/:id", controllers.DeleteFile)
 	}
 
 	return r

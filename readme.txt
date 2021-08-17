@@ -50,3 +50,6 @@ $ migrate -help
 
 buat filemigration tabel users
 migrate create -ext sql -dir db/migrations -seq create_users_table
+
+Untuk update dependencies pada modul kita.
+$ go mod tidy

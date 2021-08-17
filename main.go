@@ -1,13 +1,13 @@
 package main
 
 import (
-	"base-project-go/database"
+	"base-project-go/app/models"
+	"base-project-go/config"
+	"base-project-go/route"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo"
 )
 
 func main() {
@@ -15,12 +15,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	database.ConnectDatabase()
+	config.ConnectDatabase()
+	config.DB.AutoMigrate(&models.Menu{})
+	config.DB.AutoMigrate(&models.User{})
+	config.DB.AutoMigrate(&models.Option{})
+	config.DB.AutoMigrate(&models.Role{})
+	config.DB.AutoMigrate(&models.UserMenu{})
 
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	r := route.SetupRouter()
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
+	r.Run(":" + os.Getenv("APP_PORT"))
 }

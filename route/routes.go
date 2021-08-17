@@ -77,6 +77,7 @@ func SetupRouter() *gin.Engine {
 
 		Route.POST("/upload", controllers.UploadFile)
 		Route.POST("/uploads", controllers.UploadFile2)
+		Route.POST("/delete-file/:id", controllers.DeleteFile)
 	}
 
 	return r

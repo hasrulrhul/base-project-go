@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +17,7 @@ func UploadFile(c *gin.Context) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 		return
 	}
-	// // Upload the file to specific dst.
-	// c.SaveUploadedFile(file, "uploads/"+file.Filename)
+	// Upload the file to specific dst.
 	if err = c.SaveUploadedFile(file, "uploads/"+file.Filename); err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
 	} else {
@@ -37,13 +37,28 @@ func UploadFile2(c *gin.Context) {
 	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
 	newFileName := uuid.New().String() + extension
 
-	// filename := filepath.Base(file.Filename)
-	// err = c.SaveUploadedFile(file, "uploads/"+newFileName)
+	// Upload the file to specific dst.
 	if err = c.SaveUploadedFile(file, "uploads/"+newFileName); err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
 	} else {
 		c.JSON(http.StatusOK, "success")
 	}
+}
 
-	// c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully", newFileName))
+func DeleteFile(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var path = "uploads/" + id
+	var err = os.Remove(path)
+	if err != nil {
+		return
+	}
+
+	c.JSON(http.StatusOK, "File Deleted")
+
+	// // Upload the file to specific dst.
+	// if err = c.SaveUploadedFile(file, "uploads/"+newFileName); err != nil {
+	// 	c.JSON(http.StatusBadRequest, "failed")
+	// } else {
+	// 	c.JSON(http.StatusOK, "success")
+	// }
 }

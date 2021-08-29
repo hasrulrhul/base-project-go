@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 func IndexUser(c *gin.Context) {
 	var user []models.User
 	config.DB.Preload("Role").Find(&user)
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, service.Response(user, c, "", 0))
 }
 
 func CreateUser(c *gin.Context) {
@@ -19,6 +20,13 @@ func CreateUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		panic(err)
 	}
+	hashedPassword, err := service.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "failed enkripsi")
+		return
+	}
+	user.Password = hashedPassword
+	c.JSON(http.StatusOK, user)
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
 	} else {
@@ -48,6 +56,12 @@ func UpdateUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		panic(err)
 	}
+	hashedPassword, err := service.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "failed enkripsi")
+		return
+	}
+	user.Password = hashedPassword
 	if err := config.DB.Updates(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
 	} else {

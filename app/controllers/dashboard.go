@@ -21,8 +21,5 @@ func IndexPost(c *gin.Context) {
 }
 
 func Hello(c *gin.Context) {
-	// helper.Hello("hasrul")
-	// fmt.Println("haloo")
-	// c.JSON(200, gin.H{"msg": h}) // Your custom response here
 	c.JSON(200, gin.H{"msg": "hello"}) // Your custom response here
 }

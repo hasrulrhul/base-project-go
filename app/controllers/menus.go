@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 func IndexMenu(c *gin.Context) {
 	var menu []models.Menu
 	config.DB.Find(&menu)
-	c.JSON(http.StatusOK, menu)
+	c.JSON(http.StatusOK, service.Response(menu, c, "", 0))
 }
 
 func CreateMenu(c *gin.Context) {

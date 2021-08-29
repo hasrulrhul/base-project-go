@@ -10,6 +10,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://*", "http://*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -29,6 +30,9 @@ func SetupRouter() *gin.Engine {
 		Route.GET("", controllers.Index)
 		Route.POST("/foo", controllers.IndexPost)
 		Route.GET("/halo", controllers.Hello)
+
+		Route.POST("/login", controllers.Login)
+		Route.POST("/Register", controllers.Register)
 
 		option := Route.Group("/option")
 		{

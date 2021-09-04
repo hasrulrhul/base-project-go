@@ -2,14 +2,25 @@ package route
 
 import (
 	"base-project-go/app/controllers"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	name     = "name"
+	username = "username"
+	email    = "email"
+	role     = "role"
+)
+
 func SetupRouter() *gin.Engine {
-	r := gin.Default()
+	// r := gin.Default()
+	r := gin.New()
+	r.Use(sessions.Sessions("mysession", sessions.NewCookieStore([]byte("secret"))))
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://*", "http://*"},
@@ -28,61 +39,78 @@ func SetupRouter() *gin.Engine {
 	Route := r.Group("/api")
 	{
 		Route.GET("", controllers.Index)
-		Route.POST("/foo", controllers.IndexPost)
-		Route.GET("/halo", controllers.Hello)
-
 		Route.POST("/login", controllers.Login)
-		Route.POST("/Register", controllers.Register)
+		Route.POST("/register", controllers.Register)
+		Route.POST("/logout", controllers.Logout)
 
-		option := Route.Group("/option")
+		auth := Route.Group("/")
+		auth.Use(AuthRequired)
 		{
-			option.GET("", controllers.IndexOption)
-			option.POST("", controllers.CreateOption)
-			option.GET("/:id", controllers.ShowOption)
-			option.PUT("/:id", controllers.UpdateOption)
-			option.DELETE("/:id", controllers.DeleteOption)
-		}
+			auth.GET("/status", controllers.Status)
+			option := auth.Group("/option")
+			{
+				option.GET("", controllers.IndexOption)
+				option.POST("", controllers.CreateOption)
+				option.GET("/:id", controllers.ShowOption)
+				option.PUT("/:id", controllers.UpdateOption)
+				option.DELETE("/:id", controllers.DeleteOption)
+			}
 
-		role := Route.Group("/role")
-		{
-			role.GET("", controllers.IndexRole)
-			role.POST("", controllers.CreateRole)
-			role.GET("/:id", controllers.ShowRole)
-			role.PUT("/:id", controllers.UpdateRole)
-			role.DELETE("/:id", controllers.DeleteRole)
-		}
+			role := auth.Group("/role")
+			{
+				role.GET("", controllers.IndexRole)
+				role.POST("", controllers.CreateRole)
+				role.GET("/:id", controllers.ShowRole)
+				role.PUT("/:id", controllers.UpdateRole)
+				role.DELETE("/:id", controllers.DeleteRole)
+			}
 
-		user := Route.Group("/user")
-		{
-			user.GET("", controllers.IndexUser)
-			user.POST("", controllers.CreateUser)
-			user.GET("/:id", controllers.ShowUser)
-			user.PUT("/:id", controllers.UpdateUser)
-			user.DELETE("/:id", controllers.DeleteUser)
-		}
+			user := auth.Group("/user")
+			{
+				user.GET("", controllers.IndexUser)
+				user.POST("", controllers.CreateUser)
+				user.GET("/:id", controllers.ShowUser)
+				user.PUT("/:id", controllers.UpdateUser)
+				user.DELETE("/:id", controllers.DeleteUser)
+			}
 
-		menu := Route.Group("/menu")
-		{
-			menu.GET("", controllers.IndexMenu)
-			menu.POST("", controllers.CreateMenu)
-			menu.GET("/:id", controllers.ShowMenu)
-			menu.PUT("/:id", controllers.UpdateMenu)
-			menu.DELETE("/:id", controllers.DeleteMenu)
-		}
+			menu := auth.Group("/menu")
+			{
+				menu.GET("", controllers.IndexMenu)
+				menu.POST("", controllers.CreateMenu)
+				menu.GET("/:id", controllers.ShowMenu)
+				menu.PUT("/:id", controllers.UpdateMenu)
+				menu.DELETE("/:id", controllers.DeleteMenu)
+			}
 
-		usermenu := Route.Group("/user-menu")
-		{
-			usermenu.GET("", controllers.IndexUserMenu)
-			usermenu.POST("", controllers.CreateUserMenu)
-			usermenu.GET("/:id", controllers.ShowUserMenu)
-			usermenu.PUT("/:id", controllers.UpdateUserMenu)
-			usermenu.DELETE("/:id", controllers.DeleteUserMenu)
-		}
+			usermenu := auth.Group("/user-menu")
+			{
+				usermenu.GET("", controllers.IndexUserMenu)
+				usermenu.POST("", controllers.CreateUserMenu)
+				usermenu.GET("/:id", controllers.ShowUserMenu)
+				usermenu.PUT("/:id", controllers.UpdateUserMenu)
+				usermenu.DELETE("/:id", controllers.DeleteUserMenu)
+			}
 
-		Route.POST("/upload", controllers.UploadFile)
-		Route.POST("/uploads", controllers.UploadFile2)
-		Route.POST("/delete-file/:id", controllers.DeleteFile)
+			auth.POST("/upload", controllers.UploadFile)
+			auth.POST("/uploads", controllers.UploadFile2)
+			auth.POST("/delete-file/:id", controllers.DeleteFile)
+
+		}
 	}
 
 	return r
+}
+
+// AuthRequired is a simple middleware to check the session
+func AuthRequired(c *gin.Context) {
+	session := sessions.Default(c)
+	user := session.Get(name)
+	if user == nil {
+		// Abort the request with the appropriate error code
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	// Continue down the chain to handler etc
+	c.Next()
 }

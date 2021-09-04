@@ -26,7 +26,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	user.Password = hashedPassword
-	c.JSON(http.StatusOK, user)
 	if err := config.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
 	} else {

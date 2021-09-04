@@ -23,8 +23,8 @@ func (b *User) TableName() string {
 	return "user"
 }
 
-type Login struct {
-	Username string `gorm:"unique" json:"username"`
+type LoginCredentials struct {
+	// Username string `gorm:"unique" json:"username"`
 	Email    string `gorm:"unique" json:"email"`
 	Password string `json:"password"`
 }

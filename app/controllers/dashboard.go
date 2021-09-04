@@ -9,7 +9,6 @@ import (
 )
 
 func Index(c *gin.Context) {
-
 	c.JSON(http.StatusOK, gin.H{"message": "welcome to dashboard"})
 }
 

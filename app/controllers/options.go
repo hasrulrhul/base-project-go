@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 func IndexOption(c *gin.Context) {
 	var option []models.Option
 	config.DB.Find(&option)
-	c.JSON(http.StatusOK, option)
+	c.JSON(http.StatusOK, service.Response(option, c, "", 0))
 }
 
 func CreateOption(c *gin.Context) {

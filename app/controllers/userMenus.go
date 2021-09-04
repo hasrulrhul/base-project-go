@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 func IndexUserMenu(c *gin.Context) {
 	var usermenu []models.UserMenu
 	config.DB.Preload("Role").Preload("Menu").Find(&usermenu)
-	c.JSON(http.StatusOK, usermenu)
+	c.JSON(http.StatusOK, service.Response(usermenu, c, "", 0))
 }
 
 func CreateUserMenu(c *gin.Context) {

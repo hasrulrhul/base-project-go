@@ -50,15 +50,8 @@ func DeleteFile(c *gin.Context) {
 	var path = "uploads/" + id
 	var err = os.Remove(path)
 	if err != nil {
-		return
+		c.JSON(http.StatusBadRequest, "failed")
+	} else {
+		c.JSON(http.StatusOK, "success")
 	}
-
-	c.JSON(http.StatusOK, "File Deleted")
-
-	// // Upload the file to specific dst.
-	// if err = c.SaveUploadedFile(file, "uploads/"+newFileName); err != nil {
-	// 	c.JSON(http.StatusBadRequest, "failed")
-	// } else {
-	// 	c.JSON(http.StatusOK, "success")
-	// }
 }

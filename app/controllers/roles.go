@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 func IndexRole(c *gin.Context) {
 	var role []models.Role
 	config.DB.Find(&role)
-	c.JSON(http.StatusOK, role)
+	c.JSON(http.StatusOK, service.Response(role, c, "", 0))
 }
 
 func CreateRole(c *gin.Context) {

@@ -9,7 +9,6 @@ import (
 )
 
 func Index(c *gin.Context) {
-
 	c.JSON(http.StatusOK, gin.H{"message": "welcome to dashboard"})
 }
 
@@ -21,8 +20,5 @@ func IndexPost(c *gin.Context) {
 }
 
 func Hello(c *gin.Context) {
-	// helper.Hello("hasrul")
-	// fmt.Println("haloo")
-	// c.JSON(200, gin.H{"msg": h}) // Your custom response here
 	c.JSON(200, gin.H{"msg": "hello"}) // Your custom response here
 }

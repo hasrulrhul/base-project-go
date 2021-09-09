@@ -2,6 +2,7 @@ package route
 
 import (
 	"base-project-go/app/controllers"
+	"base-project-go/middleware"
 	"net/http"
 	"time"
 
@@ -43,7 +44,12 @@ func SetupRouter() *gin.Engine {
 		Route.POST("/register", controllers.Register)
 		Route.POST("/logout", controllers.Logout)
 
+		Route.GET("/ping", func(c *gin.Context) {
+			c.String(200, "No Authorization JWT")
+		})
+
 		auth := Route.Group("/")
+		auth.Use(middleware.Authz())
 		auth.Use(AuthRequired)
 		{
 			auth.GET("/status", controllers.Status)
@@ -97,6 +103,7 @@ func SetupRouter() *gin.Engine {
 			auth.POST("/delete-file/:id", controllers.DeleteFile)
 
 		}
+
 	}
 
 	return r

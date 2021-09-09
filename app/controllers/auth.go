@@ -4,11 +4,27 @@ import (
 	"base-project-go/app/models"
 	"base-project-go/config"
 	"base-project-go/service"
+	"log"
 	"net/http"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
+
+// LoginResponse token response
+type LoginResponse struct {
+	ID       uint
+	Name     string
+	Username string
+	Email    string
+	Role     string
+	RoleName string
+	// Token        string `json:"token"`
+	AccessToken string `json:"access_token"`
+	// RefreshToken string `json:"refresh_token"`
+}
 
 const (
 	name     = "name"
@@ -26,42 +42,53 @@ func Login(c *gin.Context) {
 	err := config.DB.Preload("Role").Where("email = ?", u.Email).First(&user).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "user not found"})
-	} else {
-		// cek password
-		match := service.CheckPasswordHash(u.Password, user.Password)
-		if match {
-			session := sessions.Default(c)
-			// In real world usage you'd set this to the users
-			session.Set(name, user.Name)
-			session.Set(username, user.Username)
-			session.Set(email, user.Email)
-			session.Set(role, user.Role.Role)
-			if err := session.Save(); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
-				return
-			}
-			// tokens, err := service.GenerateTokenPair()
-			// if err != nil {
-			// 	c.JSON(http.StatusBadRequest, "failed generate token")
-			// 	return
-			// }
-			// c.JSON(http.StatusBadRequest, gin.H{"data": user, "token": tokens, "message": "login success"})
-			c.JSON(http.StatusBadRequest, gin.H{"data": user, "message": "login success"})
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "password wrong"})
-		}
+		return
 	}
 
-	// result, err := config.DB.Where("email = ?", user.Email).First(&user)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, "user not found")
-	// }
+	// cek password
+	match := service.CheckPasswordHash(u.Password, user.Password)
+	if match == false {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "password wrong"})
+		return
+	}
 
-	// c.JSON(http.StatusOK, tokens)
-	// c.JSON(http.StatusOK, service.Response(result, c, "", 0))
+	// create session login users
+	session := sessions.Default(c)
+	session.Set(name, user.Name)
+	session.Set(username, user.Username)
+	session.Set(email, user.Email)
+	session.Set(role, user.Role.Role)
+	if err := session.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		return
+	}
 
-	// c.JSON(http.StatusOK, gin.H{"user": user.Username, "pass": user.Password})
-	// c.JSON(http.StatusOK, gin.H{"user": user.Username, "pass": user.Password})
+	// generate token login
+	jwtWrapper := service.JwtWrapper{
+		SecretKey:       "verysecretkey",
+		Issuer:          "AuthService",
+		ExpirationHours: 24,
+	}
+	signedToken, err := jwtWrapper.GenerateToken(user.Email, uint(user.ID))
+	if err != nil {
+		log.Println(err)
+		c.JSON(500, gin.H{
+			"msg": "error signing token",
+		})
+		c.Abort()
+		return
+	}
+
+	tokenResponse := LoginResponse{
+		ID:          user.ID,
+		Name:        user.Name,
+		Username:    user.Username,
+		Email:       user.Email,
+		Role:        user.Role.Role,
+		RoleName:    user.Role.Name,
+		AccessToken: signedToken,
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "login success", "data": tokenResponse})
 }
 
 func Register(c *gin.Context) {
@@ -111,4 +138,23 @@ func GetSession(c *gin.Context) {
 
 func Status(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "You are logged in"})
+}
+
+func GenerateJWT(email, role string, c *gin.Context) (string, error) {
+	var mySigningKey = []byte("secretkey")
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["authorized"] = true
+	claims["email"] = email
+	claims["role"] = role
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+
+	tokenString, err := token.SignedString(mySigningKey)
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "Something Went Wrong"})
+		return "", err
+	}
+	return tokenString, nil
 }

@@ -1,5 +1,5 @@
 # Clone Project
-git@github.com:hasrulrhul/base-project-go.git
+``` git@github.com:hasrulrhul/base-project-go.git ```
 
 # inisalisasi project
 go mod init base-project-go

@@ -18,7 +18,10 @@ func IndexUser(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	hashedPassword, err := service.HashPassword(user.Password)
 	if err != nil {
@@ -53,7 +56,10 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	if err := c.BindJSON(&user); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	hashedPassword, err := service.HashPassword(user.Password)
 	if err != nil {

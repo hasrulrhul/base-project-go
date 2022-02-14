@@ -8,10 +8,10 @@ import (
 
 type Option struct {
 	ID          uint           `json:"id"`
-	Code        string         `json:"code"`
-	Value       string         `json:"value"`
+	Code        string         `json:"code" binding:"required"`
+	Value       string         `json:"value" binding:"required"`
 	Description string         `json:"description"`
-	Index       uint16         `json:"index"`
+	Index       uint16         `json:"index" binding:"required,number"`
 	Active      string         `gorm:"type:enum('1', '0');default:'1'" json:"active"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`

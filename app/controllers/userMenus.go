@@ -18,7 +18,10 @@ func IndexUserMenu(c *gin.Context) {
 func CreateUserMenu(c *gin.Context) {
 	var usermenu models.UserMenu
 	if err := c.BindJSON(&usermenu); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	if err := config.DB.Create(&usermenu).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
@@ -47,7 +50,10 @@ func UpdateUserMenu(c *gin.Context) {
 		return
 	}
 	if err := c.BindJSON(&usermenu); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	if err := config.DB.Updates(&usermenu).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")

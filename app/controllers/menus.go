@@ -18,7 +18,10 @@ func IndexMenu(c *gin.Context) {
 func CreateMenu(c *gin.Context) {
 	var menu models.Menu
 	if err := c.BindJSON(&menu); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	// config.DB.Create(&menu)
 	if err := config.DB.Create(&menu).Error; err != nil {
@@ -48,7 +51,10 @@ func UpdateMenu(c *gin.Context) {
 		return
 	}
 	if err := c.BindJSON(&menu); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	if err := config.DB.Updates(&menu).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")

@@ -18,7 +18,10 @@ func IndexOption(c *gin.Context) {
 func CreateOption(c *gin.Context) {
 	var option models.Option
 	if err := c.BindJSON(&option); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	if err := config.DB.Create(&option).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")
@@ -47,7 +50,10 @@ func UpdateOption(c *gin.Context) {
 		return
 	}
 	if err := c.BindJSON(&option); err != nil {
-		panic(err)
+		for _, v := range c.Errors {
+			c.JSON(http.StatusBadRequest, gin.H{"error": v.Error()})
+			return
+		}
 	}
 	if err := config.DB.Updates(&option).Error; err != nil {
 		c.JSON(http.StatusBadRequest, "failed")

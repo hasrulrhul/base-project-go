@@ -10,7 +10,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASS") + "@(127.0.0.1:3306)/" + os.Getenv("DB_NAME") +
+	dsn := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASS") + "@(127.0.0.1:8889)/" + os.Getenv("DB_NAME") +
 		"?charset=utf8mb4&parseTime=True&loc=Local"
 	config := gorm.Config{}
 
@@ -19,7 +19,6 @@ func ConnectDatabase() {
 		panic("Failed to connect to database!" + os.Getenv("DB_USER"))
 	}
 	DB = db
-
 }
 
 func CloseDatabaseConnection(db *gorm.DB) {

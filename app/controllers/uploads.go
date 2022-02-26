@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"base-project-go/helper"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,9 +20,11 @@ func UploadFile(c *gin.Context) {
 	}
 	// Upload the file to specific dst.
 	if err = c.SaveUploadedFile(file, "uploads/"+file.Filename); err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Upload failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Upload successfull!", file)
+		c.JSON(http.StatusCreated, response)
 	}
 	// c.String(http.StatusOK, file.Filename)
 }

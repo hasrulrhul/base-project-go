@@ -3,6 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/helper"
 	"base-project-go/service"
 	"net/http"
 
@@ -12,7 +13,8 @@ import (
 func IndexUser(c *gin.Context) {
 	var user []models.User
 	config.DB.Preload("Role").Find(&user)
-	c.JSON(http.StatusOK, service.Response(user, c, "", 0))
+	response := helper.BuildResponse(true, "List of user!", user)
+	c.JSON(http.StatusOK, response)
 }
 
 func CreateUser(c *gin.Context) {
@@ -30,9 +32,11 @@ func CreateUser(c *gin.Context) {
 	}
 	user.Password = hashedPassword
 	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Created user failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Created user successfull!", user)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -41,9 +45,11 @@ func ShowUser(c *gin.Context) {
 	var user models.User
 	err := config.DB.Preload("Role").First(&user, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("User not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, user)
+		response := helper.BuildResponse(true, "Detail user!", user)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -52,7 +58,8 @@ func UpdateUser(c *gin.Context) {
 	var user models.User
 	err := config.DB.Preload("Role").First(&user, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("User not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := c.BindJSON(&user); err != nil {
@@ -68,9 +75,11 @@ func UpdateUser(c *gin.Context) {
 	}
 	user.Password = hashedPassword
 	if err := config.DB.Updates(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Updates user failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Updates user successfull!", user)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -79,13 +88,16 @@ func DeleteUser(c *gin.Context) {
 	var user models.User
 	err := config.DB.First(&user, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("User not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := config.DB.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Deleted user failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Deleted user successfull!", user)
+		c.JSON(http.StatusOK, response)
 	}
 }
 

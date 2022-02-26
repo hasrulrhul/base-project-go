@@ -3,8 +3,8 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/helper"
 	"base-project-go/service"
-	"log"
 	"net/http"
 	"time"
 
@@ -41,14 +41,16 @@ func Login(c *gin.Context) {
 	var user models.User
 	err := config.DB.Preload("Role").Where("email = ?", u.Email).First(&user).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		response := helper.BuildErrorResponse("User not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
 	// cek password
 	match := service.CheckPasswordHash(u.Password, user.Password)
 	if match == false {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "password wrong"})
+		response := helper.BuildErrorResponse("Password wrong", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -59,7 +61,8 @@ func Login(c *gin.Context) {
 	session.Set(email, user.Email)
 	session.Set(role, user.Role.Role)
 	if err := session.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		response := helper.BuildErrorResponse("Password wrong", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -71,11 +74,8 @@ func Login(c *gin.Context) {
 	}
 	signedToken, err := jwtWrapper.GenerateToken(user.Email, uint(user.ID))
 	if err != nil {
-		log.Println(err)
-		c.JSON(500, gin.H{
-			"msg": "error signing token",
-		})
-		c.Abort()
+		response := helper.BuildErrorResponse("Error signing token", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -88,7 +88,8 @@ func Login(c *gin.Context) {
 		RoleName:    user.Role.Name,
 		AccessToken: signedToken,
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "login success", "data": tokenResponse})
+	response := helper.BuildResponse(true, "login successfull!", tokenResponse)
+	c.JSON(http.StatusOK, response)
 }
 
 func Register(c *gin.Context) {
@@ -98,14 +99,17 @@ func Register(c *gin.Context) {
 	}
 	hashedPassword, err := service.HashPassword(user.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed enkripsi")
+		response := helper.BuildErrorResponse("Failed to enkripsi", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	user.Password = hashedPassword
 	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Register failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "register success")
+		response := helper.BuildResponse(true, "Register successfull!", helper.EmptyObj{})
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -113,7 +117,8 @@ func Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	user := session.Get(name)
 	if user == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid session token"})
+		response := helper.BuildErrorResponse("Invalid session token", "", helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	session.Delete(name)
@@ -121,10 +126,12 @@ func Logout(c *gin.Context) {
 	session.Delete(email)
 	session.Delete(role)
 	if err := session.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		response := helper.BuildErrorResponse("Failed to save session", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	response := helper.BuildResponse(true, "Successfully logged out!", helper.EmptyObj{})
+	c.JSON(http.StatusOK, response)
 }
 
 func GetSession(c *gin.Context) {
@@ -137,7 +144,8 @@ func GetSession(c *gin.Context) {
 }
 
 func Status(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "You are logged in"})
+	response := helper.BuildResponse(true, "You are logged in!", helper.EmptyObj{})
+	c.JSON(http.StatusCreated, response)
 }
 
 func GenerateJWT(email, role string, c *gin.Context) (string, error) {
@@ -153,8 +161,8 @@ func GenerateJWT(email, role string, c *gin.Context) (string, error) {
 	tokenString, err := token.SignedString(mySigningKey)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"status": "Something Went Wrong"})
-		return "", err
+		response := helper.BuildErrorResponse("Something Went Wrong", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	}
 	return tokenString, nil
 }

@@ -3,13 +3,15 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
+	"base-project-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "welcome to dashboard"})
+	response := helper.BuildResponse(true, "Welcome to dashboard!", helper.EmptyObj{})
+	c.JSON(http.StatusOK, response)
 }
 
 func IndexPost(c *gin.Context) {

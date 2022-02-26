@@ -3,7 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
-	"base-project-go/service"
+	"base-project-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,8 @@ import (
 func IndexOption(c *gin.Context) {
 	var option []models.Option
 	config.DB.Find(&option)
-	c.JSON(http.StatusOK, service.Response(option, c, "", 0))
+	response := helper.BuildResponse(true, "List of option!", option)
+	c.JSON(http.StatusOK, response)
 }
 
 func CreateOption(c *gin.Context) {
@@ -24,9 +25,11 @@ func CreateOption(c *gin.Context) {
 		}
 	}
 	if err := config.DB.Create(&option).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Created option failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Created option successfull!", option)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -35,9 +38,11 @@ func ShowOption(c *gin.Context) {
 	var option models.Option
 	err := config.DB.First(&option, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Option not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, option)
+		response := helper.BuildResponse(true, "Detail option!", option)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -46,7 +51,8 @@ func UpdateOption(c *gin.Context) {
 	var option models.Option
 	err := config.DB.First(&option, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Option not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := c.BindJSON(&option); err != nil {
@@ -56,9 +62,11 @@ func UpdateOption(c *gin.Context) {
 		}
 	}
 	if err := config.DB.Updates(&option).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Updates option failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Updates option successfull!", option)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -67,12 +75,15 @@ func DeleteOption(c *gin.Context) {
 	var option models.Option
 	err := config.DB.First(&option, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Option not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := config.DB.Delete(&option).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Deleted option failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Deleted option successfull!", option)
+		c.JSON(http.StatusOK, response)
 	}
 }

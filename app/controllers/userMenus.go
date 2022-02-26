@@ -3,7 +3,7 @@ package controllers
 import (
 	"base-project-go/app/models"
 	"base-project-go/config"
-	"base-project-go/service"
+	"base-project-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,8 @@ import (
 func IndexUserMenu(c *gin.Context) {
 	var usermenu []models.UserMenu
 	config.DB.Preload("Role").Preload("Menu").Find(&usermenu)
-	c.JSON(http.StatusOK, service.Response(usermenu, c, "", 0))
+	response := helper.BuildResponse(true, "List of usermenu!", usermenu)
+	c.JSON(http.StatusOK, response)
 }
 
 func CreateUserMenu(c *gin.Context) {
@@ -24,9 +25,11 @@ func CreateUserMenu(c *gin.Context) {
 		}
 	}
 	if err := config.DB.Create(&usermenu).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Created usermenu failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Created usermenu successfull!", usermenu)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -35,9 +38,11 @@ func ShowUserMenu(c *gin.Context) {
 	var usermenu models.UserMenu
 	err := config.DB.Preload("Role").Preload("Menu").First(&usermenu, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Usermenu not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, usermenu)
+		response := helper.BuildResponse(true, "Detail usermenu!", usermenu)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -46,7 +51,8 @@ func UpdateUserMenu(c *gin.Context) {
 	var usermenu models.UserMenu
 	err := config.DB.First(&usermenu, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Usermenu not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := c.BindJSON(&usermenu); err != nil {
@@ -56,9 +62,11 @@ func UpdateUserMenu(c *gin.Context) {
 		}
 	}
 	if err := config.DB.Updates(&usermenu).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Updates usermenu failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Updates usermenu successfull!", usermenu)
+		c.JSON(http.StatusCreated, response)
 	}
 }
 
@@ -67,12 +75,15 @@ func DeleteUserMenu(c *gin.Context) {
 	var usermenu models.UserMenu
 	err := config.DB.First(&usermenu, id).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "not found")
+		response := helper.BuildErrorResponse("Usermenu not found", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	if err := config.DB.Delete(&usermenu).Error; err != nil {
-		c.JSON(http.StatusBadRequest, "failed")
+		response := helper.BuildErrorResponse("Deleted usermenu failed", err.Error(), helper.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-		c.JSON(http.StatusOK, "success")
+		response := helper.BuildResponse(true, "Deleted usermenu successfull!", usermenu)
+		c.JSON(http.StatusOK, response)
 	}
 }

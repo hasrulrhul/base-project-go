@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID        uint           `json:"id"`
+	ID        uint           `gorm:"primary_key:auto_increment" json:"id"`
 	Name      string         `json:"name" binding:"required"`
 	Username  string         `gorm:"unique" json:"username" binding:"required"`
 	Email     string         `gorm:"unique" json:"email" binding:"required,email"`
@@ -19,12 +19,6 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
 
-func (b *User) TableName() string {
-	return "user"
-}
-
-type LoginCredentials struct {
-	// Username string `gorm:"unique" json:"username"`
-	Email    string `gorm:"unique" json:"email"`
-	Password string `json:"password"`
-}
+// func (b *User) TableName() string {
+// 	return "user"
+// }

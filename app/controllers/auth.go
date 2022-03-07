@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"base-project-go/app/models"
+	"base-project-go/app/request"
 	"base-project-go/config"
 	"base-project-go/helper"
 	"base-project-go/service"
@@ -34,7 +35,7 @@ const (
 )
 
 func Login(c *gin.Context) {
-	var u models.LoginCredentials
+	var u request.LoginValidation
 	if err := c.BindJSON(&u); err != nil {
 		panic(err)
 	}

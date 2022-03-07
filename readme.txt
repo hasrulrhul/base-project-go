@@ -7,6 +7,9 @@ go run main.go
 go build
 atau
 
+auto rub build
+nodemon --exec go run main.go --signal SIGTERM
+
 # buat file makefile kemudian
 run makefile dengan perintah make dev
 

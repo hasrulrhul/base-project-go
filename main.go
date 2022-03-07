@@ -17,9 +17,9 @@ func init() {
 	}
 	config.ConnectDatabase()
 	config.DB.AutoMigrate(&models.Menu{})
-	config.DB.AutoMigrate(&models.User{})
 	config.DB.AutoMigrate(&models.Option{})
 	config.DB.AutoMigrate(&models.Role{})
+	config.DB.AutoMigrate(&models.User{})
 	config.DB.AutoMigrate(&models.UserMenu{})
 }
 

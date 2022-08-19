@@ -1,14 +1,19 @@
-# Clone Project
-``` git@github.com:hasrulrhul/base-project-go.git ```
+# CRUD Golang + MySQL
 
-# inisalisasi project
-go mod init base-project-go
+### Clone Project
+``` 
+git@github.com:hasrulrhul/base-project-go.git 
+```
 
-# copy .env.example and rename .env
-setting your config database
+### copy .env.example and rename .env
+```setting your config database```
 
-# publish vendor
+### publish vendor
+```
 go mod vendor
+```
 
-# run project
-go run main.go
+### run project
+```
+make run
+```
